@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block body %}
+    <h3 class="mt-5">Now Playing</h3>
+    <div class="row row-cols-1 row-cols-md-4 g-4">
+        {% for movie in movies %}
+        
+            <div class="col">
+                <div class="card" >
+                    <a href="{% url 'datas' %}?movie_id={{movie.id}}" class="btn p-0">
+                        <img src={{movie.thumbnail.url}} class="card-img-top" >
+    
+                        <div class="card-body">
+                            <h5 class="card-title">{{ movie.name }}</h5>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

@@ -1,0 +1,8 @@
+.fixed-ratio-image {
+  width: 300px; /* 画像の横幅を指定 */
+}
+
+.fixed-ratio-image img {
+  width: 100%; /* 画像の横幅を親要素に合わせる */
+  height: auto; /* 高さを自動調整して画像の比率を保つ */
+}

@@ -1,0 +1,99 @@
+{% extends "base.html" %} 
+
+{% block link %} 
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+{% endblock %}
+
+{% block body %}
+<h3 class="mt-5">Seating Chart of {{schedule.movie}}({{schedule.data_and_time}} ~ )</h3>
+
+{% load static %}
+<div class="d-flex justify-content-center mt-3">
+    <img src="{% static 'images/prosedule2.svg' %}" width="400px" >
+</div>
+
+<div class="container mt-3">
+    {% for i, col in seat.items %}
+    <div class="d-flex justify-content-center">
+        {% for j, value in col.items %}
+            {% if value == 'reserved' %}
+                <div class="reserved-seat" id="{{i}}-{{j}}"></div>
+            {% else %}
+                <div class="seat" id="{{i}}-{{j}}" onclick="toggleSeatColor(this)"></div>
+            {% endif %}
+        {% endfor %}
+    </div>
+    {% endfor %}
+</div>
+
+{% load static %}
+<div class="d-flex justify-content-center mt-5">
+    <img src="{% static 'images/seat.svg' %}" width="200px" >
+</div>
+
+
+<div class="d-flex justify-content-end mt-5">
+    <form method="post" action="{% url 'reserve_view' %}">
+    {% csrf_token %}
+
+        {% if request.user.is_authenticated %}
+            {{ form.schedule}}
+            {{ form.seat}}
+            <button type="submit" class="btn btn-primary">Reserve</button>
+        {% else %}
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                Register
+            </button>
+        {% endif %}
+
+    </form>
+</div>
+  
+  <!-- Modal -->
+  <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="exampleModalLabel">Sign Up</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+
+            <form method="post" action="{% url 'signup_and_reservation' %}">
+                {% csrf_token %}
+
+                <div class="mb-3 row">
+                  <label for="input-user-id" class="col-sm-2 col-form-label">User Name</label>
+                  <div class="col-sm-10">
+                    {{ userform.username }}
+                  </div>
+                </div>
+                <div class="mb-3 row">
+                  <label for="input-password" class="col-sm-2 col-form-label">Password</label>
+                  <div class="col-sm-10">
+                    {{ userform.password }}
+                  </div>
+                </div>
+
+                {% if not request.user.is_authenticated %}
+                    {{ form.schedule}}
+                    {{ form.seat}}
+                {% endif %}
+
+
+                <div class="d-flex justify-content-end mt-5">
+                    <button type="submit" class="btn btn-primary">Sign-Up and Reserve</button>
+                </div>
+              </form>
+        </div>
+      </div>
+    </div>
+</div>
+{% endblock %}
+
+
+{% block script %}
+    {% load static %}
+    <script src="{% static 'js/script.js' %}"></script>
+{% endblock %}

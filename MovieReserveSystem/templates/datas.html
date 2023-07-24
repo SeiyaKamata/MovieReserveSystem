@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block body %}
+
+<h3 class="mt-5">{{movie.name}}'s schedule</h3>
+
+{% load static %}
+<div class="d-flex justify-content-center mt-3">
+    <img src="{% static 'images/prosedule1.svg' %}" width="400px" >
+</div>
+
+<!-- <div class="container p-5"> -->
+    <table class="table table-striped">
+        <thead class="table-light">
+          <tr>
+            <th scope="col">Date</th>
+            <th scope="col">Time</th>
+          </tr>
+        </thead>
+        <tbody class="table-group-divider">
+        {% for date, value in schedules.items %}
+        <tr>
+            <th scope="row">{{date}}</th>
+            <td>
+                {% for schedule in value %}
+                    {% if schedule.is_sold_out %}
+                        <a href="{% url 'seating_chart' %}?schedule_id={{schedule.id}} " class="btn btn-outline-secondary disabled">
+                            {{ schedule.start_at.time }} ~
+                        </a>
+                    {% else %}
+                        <a href="{% url 'seating_chart' %}?schedule_id={{schedule.id}}" class="btn btn-outline-primary">
+                                {{ schedule.start_at.time }} ~
+                        </a>
+                    {% endif %}
+                {% endfor %}
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+{% endblock %}

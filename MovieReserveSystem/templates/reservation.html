@@ -8,11 +8,13 @@
                 <div class="card" style="width: 18rem;">
                     <img src={{movie.thumbnail.url}} class="card-img-top" alt="...">
                     <div class="card-body">
-                    <p class="card-text">{{ movie.name }}</p>
-                    <a href="#" class="btn btn-primary">Go somewhere</a>
+                    <h5 class="card-title">{{ movie.name }}</h5>
+                    <a href="#" class="btn btn-primary">Select this</a>
                     </div>
                 </div>
+                <input type="hidden" value={{movie.id}}>
             </div>
         {% endfor %}
     </div>
+
 {% endblock %}

@@ -1,0 +1,21 @@
+.reserved-seat {
+  width: 30px;
+  height: 30px;
+  margin: 5px;
+  background-color: #333;
+  cursor: pointer;
+  flex-grow: 0;
+}
+
+.seat {
+  width: 30px;
+  height: 30px;
+  margin: 5px;
+  background-color: #ccc;
+  cursor: pointer;
+  flex-grow: 0;
+}
+
+.seat.selected {
+  background-color: #ff8c00; /* 選択された席の色をオレンジに変更 */
+}
