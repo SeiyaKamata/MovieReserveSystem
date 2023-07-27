@@ -20,6 +20,8 @@ from datetime import timezone
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext as _
 
+from django.db import transaction
+
 from django.contrib.auth import get_user_model
 import string
 
@@ -46,12 +48,26 @@ def signup_view(request):
     if request.method == 'POST':
         form = SignUpForm(request.POST)
         if form.is_valid():
-            user = get_user_model().objects.create_user(
-                username=form.cleaned_data['username'],
-                password=form.cleaned_data['password']
-            )
-            login(request, user)
-        return HttpResponseRedirect(reverse('movies'))
+            try:
+                with transaction.atomic():
+                    user = get_user_model().objects.create_user(
+                        username=form.cleaned_data['username'],
+                        password=form.cleaned_data['password']
+                    )
+                    login(request, user)
+                    return HttpResponseRedirect(reverse('movies'))
+            except:
+                context = {
+                    'errors': 'true',
+                    'form': form,
+                }
+                return render(request, "signup.html", context=context)
+        else:
+            context = {
+                'errors': form.errors,
+                'form': form,
+            }
+            return render(request, "signup.html", context=context)
 
     else:
         context = {
@@ -65,11 +81,19 @@ def signup_and_reservation(request):
     if request.method == 'POST':
         form = SignUpForm(request.POST)
         if form.is_valid():
-            user = get_user_model().objects.create_user(
-                username=form.cleaned_data['username'],
-                password=form.cleaned_data['password']
-            )
-            login(request, user)
+            try:
+                with transaction.atomic():
+                    user = get_user_model().objects.create_user(
+                        username=form.cleaned_data['username'],
+                        password=form.cleaned_data['password']
+                    )
+                    login(request, user)
+            except:
+                context = {
+                    'errors': 'true',
+                    'form': form,
+                }
+                return render(request, "signup.html", context=context)
 
         form = ReserveForm(request.POST)
         if form.is_valid():
@@ -113,10 +137,17 @@ def login_view(request):
                     return HttpResponse("アカウントが有効ではありません")
             # ユーザー認証失敗
             else:
-                return HttpResponse("ログインIDまたはパスワードが間違っています")
+                context = {
+                    'errors': 'true',
+                    'form': form,
+                }
+                return render(request, 'login.html', context)
         else:
-            errors = form.errors
-            return render(request, 'login.html', errors)
+            context = {
+                'errors': form.error,
+                'form': form,
+            }
+            return render(request, 'login.html', context)
 
     # GET
     else:
@@ -164,7 +195,7 @@ def datas(request):
 
 def seating_chart_view(request):
     schedule_id = request.GET.get(key="schedule_id", default="8b1168d1-52fa-456d-b936-53e60a9b8ae6")
-    reservations = Reservation.objects.filter(schedule=schedule_id)
+    reservations = Reservation.objects.filter(schedule=schedule_id, is_deleted=False)
 
     reservations = [reservation.seat_number for reservation in reservations]
 
@@ -217,7 +248,7 @@ def reserve_view(request):
 def reservation_list_view(request):
     user = request.user
 
-    reservations = Reservation.objects.filter(user=user).order_by('schedule')
+    reservations = Reservation.objects.filter(user=user, is_deleted=False).order_by('schedule')
     toast = request.GET.get(key="toast", default="False")
 
     context = {
@@ -225,3 +256,14 @@ def reservation_list_view(request):
         'toast': toast
     }
     return render(request, 'reservation_list.html', context)
+
+
+@login_required
+def delete_reservation_view(request):
+    user = request.user
+    reservation_id = request.GET.get(key="reservation_id")
+    reservation = Reservation.objects.get(id=reservation_id)
+    reservation.is_deleted = True
+    reservation.save()
+
+    return HttpResponseRedirect(reverse('reservation_list'))

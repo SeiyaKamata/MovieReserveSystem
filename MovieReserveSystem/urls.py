@@ -12,4 +12,5 @@ urlpatterns = [
     path('seating_chart/', views.seating_chart_view, name='seating_chart'),
     path('reserve_view/', views.reserve_view, name='reserve_view'),
     path('reservation_list/', views.reservation_list_view, name='reservation_list'),
+    path('delete_reservation/', views.delete_reservation_view, name='delete_reservation'),
 ]

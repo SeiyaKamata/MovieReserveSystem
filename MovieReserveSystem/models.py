@@ -13,6 +13,7 @@ class Movie(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=128, help_text='映画名')
     thumbnail = models.ImageField(upload_to='images')
+    screen_time = models.IntegerField(default=90, help_text='上映時間')
     is_deleted = models.BooleanField(default=False, help_text='削除されたらTrue')
 
     def __str__(self):
