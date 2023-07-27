@@ -27,12 +27,15 @@ class Hole(models.Model):
 
     def __str__(self):
         return f"{self.name}"
-    
+
 class Seat(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     hole = models.ForeignKey(Hole, on_delete=models.CASCADE)
     row = models.IntegerField(default=0, help_text='行')
     col = models.IntegerField(default=0, help_text='列')
+
+    def __str__(self):
+        return f"{chr(self.row+64)}-{self.col}"
 
 
 class Schedule(models.Model):
@@ -47,13 +50,12 @@ class Schedule(models.Model):
         return f"{self.movie} on {self.start_at}"
 
 
-
-
 class Reservation(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     schedule = models.ForeignKey(Schedule, on_delete=models.CASCADE)
     user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
     seat_number = models.CharField(max_length=10, help_text='座席番号')
+    seat = models.ForeignKey(Seat, null=True, on_delete=models.CASCADE)
     is_deleted = models.BooleanField(default=False, help_text='削除されたらTrue')
     created_at = models.DateTimeField(default=timezone.now, help_text='作成日')
 

@@ -6,21 +6,22 @@
 {% endblock %}
 
 {% block body %}
-<h3 class="mt-5">Seating Chart of {{schedule.movie}}({{schedule.data_and_time}} ~ )</h3>
+<h3 class="mt-5">Seating Chart of {{schedule.movie}}({{schedule.start_at}} ~ )</h3>
 
 {% load static %}
 <div class="d-flex justify-content-center mt-3">
     <img src="{% static 'images/prosedule2.svg' %}" width="400px" >
 </div>
 
+
 <div class="container mt-3">
-    {% for i, col in seat.items %}
+    {% for i, row in seats.items %}
     <div class="d-flex justify-content-center">
-        {% for j, value in col.items %}
-            {% if value == 'reserved' %}
-                <div class="reserved-seat" id="{{i}}-{{j}}"></div>
+        {% for j, col in row.items %}
+            {% if col == 'reserved' %}
+                <div class="reserved-seat"></div>
             {% else %}
-                <div class="seat" id="{{i}}-{{j}}" onclick="toggleSeatColor(this)"></div>
+                <div class="seat" id="{{col}}" onclick="toggleSeatColor(this)"></div>
             {% endif %}
         {% endfor %}
     </div>

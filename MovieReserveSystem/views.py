@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils.translation import gettext as _
 from django.db import transaction
 
-from .models import Movie, Schedule, Reservation
+from .models import Movie, Schedule, Reservation, Seat, Hole
 from .forms import LoginForm, ReserveForm, SignUpForm
 
 from datetime import datetime
@@ -50,24 +50,26 @@ def seating_chart_view(request):
     schedule_id = request.GET.get(key="schedule_id")
     reservations = Reservation.objects.filter(schedule=schedule_id, is_deleted=False)
 
-    reservations = [reservation.seat_number for reservation in reservations]
+    reserved_seats = [r.seat for r in reservations]
 
     schedule = Schedule.objects.get(id=schedule_id)
     hole = schedule.hole
 
-    row = {}
-    for r in list(string.ascii_uppercase)[:hole.row]:
+    seats = Seat.objects.filter(hole=hole).order_by('row', 'col')
+
+    test = {}
+    for r in range(1, hole.row+1):
         col = {}
         for c in range(1, hole.col+1):
-            if f'{r}-{c}' in reservations:
+            seat = seats.get(row=r, col=c)
+            if seat in reserved_seats:
                 col[c] = 'reserved'
             else:
-                col[c] = 'reservable'
-            row[r] = col
-
+                col[c] = seat.id
+            test[r] = col
 
     context = {
-        'seat': row,
+        'seats': test,
         'form': ReserveForm(),
         'schedule': schedule,
         'userform': SignUpForm(),
@@ -129,7 +131,7 @@ def signup_and_reservation(request):
             seats = seat.split(',')
             schedule = Schedule.objects.get(id=schedule)
             for seat in seats:
-                addReservation(schedule, user, seat)
+                addReservation(schedule, user, "0-0", seat)
 
         return HttpResponseRedirect(reverse('reservation_list'))
 
@@ -188,10 +190,11 @@ def reserve_view(request):
         schedule = form.cleaned_data['schedule']
         seat = form.cleaned_data['seat']
 
-        seats = seat.split(',')
         schedule = Schedule.objects.get(id=schedule)
+        seats = seat.split(',')
+
         for seat in seats:
-            addReservation(schedule, user, seat)
+            addReservation(schedule, user, "0-0", seat)
 
     return HttpResponseRedirect(reverse('reservation_list'))
 
@@ -232,10 +235,12 @@ def addUser(username, password):
     except:
         return False
 
-def addReservation(schedule, user, seat):
+def addReservation(schedule, user, sn, seat_id):
     try:
         with transaction.atomic():
-            r = Reservation(schedule=schedule, user=user, seat_number=seat)
+            seat = Seat.objects.get(id=seat_id)
+            print(seat_id)
+            r = Reservation(schedule=schedule, user=user, seat_number=sn, seat=seat)
             r.save()
             return True
     except:
@@ -260,3 +265,13 @@ def getReservationByUser(user):
     reservations = Reservation.objects.filter(user=user, is_deleted=False).order_by('schedule')
 
     return reservations
+
+def add_seat_view(request):
+    hole = Hole.objects.get(id='36be264a-50f3-4770-b64a-af166a339af3')
+
+    for row in range(1, 11):
+        for col in range(1, 21):
+            seat = Seat(hole=hole, row=row, col=col)
+            seat.save()
+
+    return '完了'

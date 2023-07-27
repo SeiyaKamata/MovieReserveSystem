@@ -1,6 +1,5 @@
 // URLを取得
 let url = new URL(window.location.href);
-console.log(url);
 
 // URLSearchParamsオブジェクトを取得
 let params = url.searchParams;
