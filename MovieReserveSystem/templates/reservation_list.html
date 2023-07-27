@@ -1,66 +1,89 @@
-{% extends "base.html" %}
+{% extends "base.html" %} {% block body %}
+<h3 class="mt-5">{{request.user.username}}'s reservations</h3>
 
-{% block body %}
-<h3 class="mt-5">My Reservation</h3>
-
-{% for reservation in reservations %}
-    <div class="card px-0 mb-5">
-        <div class="d-flex">
-            <img src="{{reservation.schedule.movie.thumbnail.url}}" width="110px">
-            <div class="card-body">
-                <h5 class="card-title">{{reservation.schedule.movie}}</h5>
-                <p class="card-text">
-                    <strong>Start At</strong>: {{reservation.schedule.start_at}}</br>
-                    <strong>Screen Time</strong>: {{reservation.schedule.movie.screen_time}} min</br>
-                    <strong>Seat Number</strong>: {{reservation}}
-                </p>
-            </div>
-            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#exampleModal" onclick="deleteReservation(this)">
-                <input type="hidden" value="{% url 'delete_reservation' %}?reservation_id={{reservation.id}}">
-                <input type="hidden" value="{{reservation.schedule.start_at}}</br>{{reservation.schedule.movie.screen_time}} min</br>{{reservation}}">
-                Delete
-            </button>
-        </div>
-    </div>
-{% endfor %}
-
+<table class="table table-striped">
+  <thead class="table-light">
+    <tr>
+      <th scope="col">Movie</th>
+      <th scope="col">Start At</th>
+      <th scope="col">Screen Time</th>
+      <th scope="col">Seat Number</th>
+      <th scope="col"></th>
+    </tr>
+  </thead>
+  <tbody class="table-group-divider">
+    {% for reservation in reservations %}
+    <tr>
+      <td>{{reservation.schedule.movie}}</td>
+      <td>{{reservation.schedule.start_at}}</td>
+      <td>{{reservation.schedule.movie.screen_time}} min</td>
+      <td>{{reservation}}</td>
+      <td>
+        <button
+          type="button"
+          class="btn btn-outline-danger"
+          data-bs-toggle="modal"
+          data-bs-target="#ConfirmModal"
+          onclick="deleteReservation(this)"
+        >
+          <input
+            type="hidden"
+            value="{% url 'delete_reservation' %}?reservation_id={{reservation.id}}"
+          />
+          <input
+            type="hidden"
+            value="{{reservation.schedule.start_at}}</br>{{reservation.schedule.movie.screen_time}} min</br>{{reservation}}"
+          />
+          Cancel
+        </button>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
 
 <!-- Modal -->
-<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-<div class="modal-dialog">
+<div
+  class="modal fade"
+  id="ConfirmModal"
+  tabindex="-1"
+  aria-labelledby="ConfirmModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog">
     <div class="modal-content">
-        <div class="modal-header">
-            <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div id="modal-text" class="modal-body">
-            予約を削除します。
-            よろしいですか。
-        </div>
-        <div class="modal-footer">
-            <a id="delete-button" href="" class="btn btn-danger ">Delete</a>
-        </div>
+      <div class="modal-header">
+        <h5 class="modal-title" id="ConfirmModalLabel">Confirm</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div id="modal-text" class="modal-body">Cancel reservation. Is it OK?</div>
+      <div class="modal-footer">
+        <a id="delete-button" href="" class="btn btn-danger">Cancel</a>
+      </div>
     </div>
+  </div>
 </div>
+
+{% if toast is True %}
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+  <div
+    id="liveToast"
+    class="toast text-bg-primary"
+    role="alert"
+    aria-live="assertive"
+    aria-atomic="true"
+  >
+    <div class="d-flex">
+      <div class="toast-body">Reservation is done</div>
+      <button
+        type="button"
+        class="btn-close btn-close-white me-2 m-auto"
+        data-bs-dismiss="toast"
+        aria-label="Close"
+      ></button>
+    </div>
+  </div>
 </div>
-
-
-
-    {% if toast is True %}
-        <div class="toast-container position-fixed bottom-0 end-0 p-3">
-            <div id="liveToast" class="toast text-bg-primary" role="alert" aria-live="assertive" aria-atomic="true">
-                <div class="d-flex">
-                    <div class="toast-body">
-                    Reservation is done
-                    </div>
-                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-                </div>
-            </div>
-        </div>
-    {% endif %}
-{% endblock %}
-
-{% block script %}
-    {% load static %}
-    <script src="{% static 'js/reservation.js' %}"></script>
+{% endif %} {% endblock %} {% block script %} {% load static %}
+<script src="{% static 'js/reservation.js' %}"></script>
 {% endblock %}

@@ -1,18 +1,18 @@
 from django.db import models
-import uuid
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
 
+import uuid
+
 class CustomUser(AbstractUser):
     pass
-
 
 # Create your models here.
 class Movie(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=128, help_text='映画名')
-    thumbnail = models.ImageField(upload_to='images')
+    poster = models.ImageField(upload_to='images')
     screen_time = models.IntegerField(default=90, help_text='上映時間')
     is_deleted = models.BooleanField(default=False, help_text='削除されたらTrue')
 
@@ -27,6 +27,12 @@ class Hole(models.Model):
 
     def __str__(self):
         return f"{self.name}"
+    
+class Seat(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    hole = models.ForeignKey(Hole, on_delete=models.CASCADE)
+    row = models.IntegerField(default=0, help_text='行')
+    col = models.IntegerField(default=0, help_text='列')
 
 
 class Schedule(models.Model):

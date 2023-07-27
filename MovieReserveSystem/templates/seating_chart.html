@@ -34,7 +34,7 @@
 
 
 <div class="d-flex justify-content-end mt-5">
-    <form method="post" action="{% url 'reserve_view' %}">
+    <form method="post" action="{% url 'reserve' %}">
     {% csrf_token %}
 
         {% if request.user.is_authenticated %}

@@ -6,8 +6,8 @@
         {% for movie in movies %}
             <div class="col">
                 <div class="card">
-                    <a href="{% url 'datas' %}?movie_id={{movie.id}}" class="btn p-0">
-                        <img src={{movie.thumbnail.url}} class="card-img-top" >
+                    <a href="{% url 'schedule' %}?movie_id={{movie.id}}" class="btn p-0">
+                        <img src={{movie.poster.url}} class="card-img-top" >
     
                         <div class="card-body">
                             <h5 class="card-title">{{ movie.name }}</h5>

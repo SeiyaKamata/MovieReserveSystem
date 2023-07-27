@@ -1,12 +1,9 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.models import User
-
 
 class LoginForm(forms.Form):
     username = forms.CharField(
         label='User Name', 
-        max_length=20, 
+        max_length=128, 
         widget=forms.TextInput(
             attrs={
                 'class': 'form-control',
@@ -16,7 +13,7 @@ class LoginForm(forms.Form):
     )
     password = forms.CharField(
         label='password', 
-        max_length=20, 
+        max_length=128, 
         widget=forms.TextInput(
             attrs={
                 'class': 'form-control',
