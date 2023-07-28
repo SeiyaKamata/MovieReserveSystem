@@ -18,6 +18,7 @@ class LoginForm(forms.Form):
             attrs={
                 'class': 'form-control',
                 'id': 'input-password',
+                'type':'password',
             }
         )
     )
@@ -40,6 +41,7 @@ class SignUpForm(forms.Form):
             attrs={
                 'class': 'form-control',
                 'id': 'input-password',
+                'type':'password',
             }
         )
     )

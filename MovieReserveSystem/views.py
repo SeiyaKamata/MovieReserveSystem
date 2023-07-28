@@ -13,6 +13,8 @@ from datetime import datetime
 from datetime import timedelta
 from datetime import timezone
 
+import random
+
 import string
 
 def movies_view(request):
@@ -31,7 +33,7 @@ def schedule_view(request):
 
     schedule_array = {}
     start = datetime.now(timezone.utc).replace(hour=0,minute=0,second=0,microsecond=0)
-    end = start + timedelta(days=1)
+    end = start + timedelta(days=1) - timedelta(microseconds=1)
     for _ in range(14):
         date = start.strftime('%Y/%m/%d')
         oneday_schedules = schedules.filter(start_at__range=[start, end]).order_by('start_at')
@@ -131,7 +133,17 @@ def signup_and_reservation(request):
             seats = seat.split(',')
             schedule = Schedule.objects.get(id=schedule)
             for seat in seats:
-                addReservation(schedule, user, "0-0", seat)
+                addReservation(schedule, user, seat)
+            
+            num_seat = schedule.hole.row * schedule.hole.col
+            num = Reservation.objects.filter(schedule=schedule).count()
+            print(num_seat)
+            print(num)
+
+            if num_seat == num:
+                schedule.is_sold_out = True
+                schedule.save()
+
 
         return HttpResponseRedirect(reverse('reservation_list'))
 
@@ -194,7 +206,14 @@ def reserve_view(request):
         seats = seat.split(',')
 
         for seat in seats:
-            addReservation(schedule, user, "0-0", seat)
+            addReservation(schedule, user, seat)
+        
+        num_seat = schedule.hole.row * schedule.hole.col
+        num = Reservation.objects.filter(schedule=schedule, is_deleted=False).count()
+
+        if num_seat == num:
+            schedule.is_sold_out = True
+            schedule.save()
 
     return HttpResponseRedirect(reverse('reservation_list'))
 
@@ -235,12 +254,15 @@ def addUser(username, password):
     except:
         return False
 
-def addReservation(schedule, user, sn, seat_id):
+def addReservation(schedule, user, seat_id):
     try:
         with transaction.atomic():
             seat = Seat.objects.get(id=seat_id)
-            print(seat_id)
-            r = Reservation(schedule=schedule, user=user, seat_number=sn, seat=seat)
+            if Reservation.objects.filter(schedule=schedule, seat=seat).exists():
+                print("test")
+                return False
+            r = Reservation(schedule=schedule, user=user, seat=seat)
+
             r.save()
             return True
     except:
@@ -252,6 +274,10 @@ def deleteReservationByID(id):
             reservation = Reservation.objects.get(id=id)
             reservation.is_deleted = True
             reservation.save()
+            schedule = reservation.schedule
+            schedule.is_sold_out = False
+            schedule.save()
+
             return True
     except:
         return False
@@ -262,16 +288,35 @@ def getReservationByID(id):
     return reservation
 
 def getReservationByUser(user):
-    reservations = Reservation.objects.filter(user=user, is_deleted=False).order_by('schedule')
+    reservations = Reservation.objects.filter(user=user, is_deleted=False).order_by('-created_at')
 
     return reservations
 
 def add_seat_view(request):
-    hole = Hole.objects.get(id='36be264a-50f3-4770-b64a-af166a339af3')
+    hole = Hole.objects.get(id='64bbe3a2-ace4-4faa-b827-c97225642fad')
 
     for row in range(1, 11):
-        for col in range(1, 21):
+        for col in range(1, 11):
             seat = Seat(hole=hole, row=row, col=col)
             seat.save()
 
-    return '完了'
+    return HttpResponseRedirect(reverse('movies'))
+
+def add_schedule(request):
+    movies = Movie.objects.all()
+    holes = Hole.objects.all()
+    time = datetime.now(timezone.utc)
+
+    for i in range(1, 14):
+        time +=  timedelta(days=1)
+        for j in range(10):
+            movies = Movie.objects.all()
+            holes = Hole.objects.all()
+            m = random.randint(0, 4)
+            h = random.randint(0,1)
+            t = random.randint(0, 23)
+            time = time.replace(hour=t,minute=0,second=0,microsecond=0)
+            schedule = Schedule(movie=movies[m], hole=holes[h], start_at=time)
+            schedule.save()
+
+    return HttpResponseRedirect(reverse('movies'))

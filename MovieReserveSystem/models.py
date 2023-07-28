@@ -54,10 +54,9 @@ class Reservation(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     schedule = models.ForeignKey(Schedule, on_delete=models.CASCADE)
     user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
-    seat_number = models.CharField(max_length=10, help_text='座席番号')
     seat = models.ForeignKey(Seat, null=True, on_delete=models.CASCADE)
     is_deleted = models.BooleanField(default=False, help_text='削除されたらTrue')
     created_at = models.DateTimeField(default=timezone.now, help_text='作成日')
 
     def __str__(self):
-        return self.seat_number
+        return f"{self.seat}"
